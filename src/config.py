@@ -14,11 +14,11 @@ CATEGORY_LABEL = {1: "Selected", 2: "Bangladesh", 3: "Indian Bangla",
 
 _DEFAULTS = {
     "concurrency": 250,
-    "timeout_total": 8,
-    "timeout_connect": 5,
+    "timeout_total": 10,
+    "timeout_connect": 6,
     "retries": 1,               # extra attempts on timeout/connection errors
     "check_dead_links": True,
-    "hls_verify": True,
+    "hls_verify": False,        # OFF: status-only (fewer false "dead"). ON = strict.
     "set_group_by_category": False,   # keep each channel's ORIGINAL group-title
     "sort_within_category": True,
     "max_others": 40000,
