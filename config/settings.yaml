@@ -1,10 +1,12 @@
 # ---- Speed / accuracy ----
 concurrency: 250          # parallel checks PER shard job
-timeout_total: 8          # seconds per URL (lower = faster, drops slow links sooner)
-timeout_connect: 5
+timeout_total: 10         # seconds per URL (raise for slow IP hosts)
+timeout_connect: 6
 retries: 1                # extra tries on timeout/connection errors
 check_dead_links: true    # (local run only; the CI workflow always checks)
-hls_verify: true          # for .m3u8, read a tiny chunk to confirm it's real
+hls_verify: false         # false = a 2xx response counts as alive (recommended).
+                          # true = also read the m3u8 body for "#EXT" (stricter,
+                          # but can wrongly drop slow/CDN streams).
 
 # ---- Parallelism (GitHub Actions) ----
 shards: 10                # split checking across N parallel jobs. 200k URLs / 10
@@ -18,7 +20,7 @@ min_keep_ratio: 0.5       # ABORT commit if kept < 50% of last run (source down?
 set_group_by_category: false  # false = keep each channel's ORIGINAL group-title.
                               # Priority only controls ORDER in AllPlaylist, not names.
 sort_within_category: true    # Selected uses selected.txt order; others A-Z
-max_others: 0                # cap "Others" bucket (0 = unlimited)
+max_others: 40000            # cap "Others" bucket (0 = unlimited)
 max_per_category: 0          # cap every bucket (0 = unlimited)
 
 # ---- Network identity ----
