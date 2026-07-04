@@ -7,8 +7,6 @@ a definitive bad HTTP status is NOT retried (it won't change).
 import asyncio
 import aiohttp
 
-ALIVE_STATUS = (200, 206)
-
 
 async def _check(session, url, headers, timeout, hls_verify, retries):
     attempt = 0
@@ -17,12 +15,16 @@ async def _check(session, url, headers, timeout, hls_verify, retries):
             async with session.get(
                 url, headers=headers, timeout=timeout, allow_redirects=True
             ) as r:
-                if r.status not in ALIVE_STATUS:
+                # Any 2xx = server is serving the stream. Redirects already
+                # followed. This alone is a reliable "alive" signal.
+                if not (200 <= r.status < 300):
                     return False
-                ctype = r.headers.get("Content-Type", "").lower()
-                if hls_verify and (".m3u8" in url.lower() or "mpegurl" in ctype):
-                    chunk = await r.content.read(256)
-                    return b"#EXT" in chunk
+                # Optional strict mode (off by default): confirm the m3u8 body.
+                if hls_verify:
+                    ctype = r.headers.get("Content-Type", "").lower()
+                    if ".m3u8" in url.lower() or "mpegurl" in ctype:
+                        chunk = await r.content.read(512)
+                        return b"#EXT" in chunk
                 return True
         except Exception:
             if attempt >= retries:
